@@ -4,11 +4,16 @@ import urllib
 import json
 import PIL.Image
 import os.path
+import os
 import untangle
 
 cards={}
 imgW=300
 imgH=419
+
+def make_cache_dir():
+    if not os.path.isdir("cards"):
+        os.mkdir("cards")
 
 def get_runner_back():
     filename = os.path.join("cards","runner-back.png")
@@ -28,15 +33,16 @@ def get_corp_back():
 
 def get_card(id):
     if not cards.has_key(id):
+        print "downloading card id: %s" % id
         data=urllib.urlopen("http://netrunnerdb.com/api/card/%s" % id).read()
         j_data=json.loads(data)
         cards[id]=j_data[0]
-        print cards[id]
     return cards[id]
 
 def get_image(id):
     filename = os.path.join("cards",id+".png")
     if not os.path.isfile(filename):
+        make_cache_dir()
         print "Downloading %s" % filename
         card=get_card(id)
         data=urllib.urlopen("http://netrunnerdb.com/%s" % card['imagesrc']).read()
