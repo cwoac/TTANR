@@ -8,6 +8,7 @@ import os
 import untangle
 import random
 import string
+import argparse
 
 cards={}
 imgW=300
@@ -189,3 +190,23 @@ def write_files(deck,base_path):
 
     deckImage.save(basefilename+'.jpg','JPEG')
     backImage.save(basefilename+'-back.jpg','JPEG')
+
+def main():
+    parser = argparse.ArgumentParser(description="Create a set of files for loading ANR decks into TableTop Simulator")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("-n","--netrunnerdb",metavar="ID",help="Load deck from netrunnerdb using given ID.")
+    group.add_argument("-o","--octgn",metavar="file",help="Load the given o8n file (in octgn format).")
+    parser.add_argument("baseurl",help="Base url for where the images will be made availiable")
+    args = parser.parse_args()
+
+    deck=None
+    if args.netrunnerdb != None:
+        deck=load_netrunnerdb_deck(args.netrunnerdb)
+    if args.octgn != None:
+        deck=load_octgn_deck(args.octgn)
+
+    write_files(deck,args.baseurl)
+
+
+if __name__ == "__main__":
+    main()
