@@ -95,8 +95,15 @@ def get_corp_back():
 
 def get_card(id):
     if not cards.has_key(id):
-        print "downloading card id: %s" % id
-        data=urllib.urlopen("http://netrunnerdb.com/api/card/%s" % id).read()
+        filename = os.path.join("cards",id+".json")
+        if not os.path.isfile(filename):
+            make_cache_dir()
+            print "downloading card id: %s" % id
+            data=urllib.urlopen("http://netrunnerdb.com/api/card/%s" % id).read()
+            fh=open(filename,'w')
+            fh.write(data)
+            fh.close()
+        data=open(filename).read()
         j_data=json.loads(data)
         cards[id]=j_data[0]
     return cards[id]
