@@ -2,3 +2,7 @@
 cards
 *.jpg
 *.json
+*.o8d
+*.spec
+build
+dist
