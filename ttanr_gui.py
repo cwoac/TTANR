@@ -40,7 +40,10 @@ class TTANR:
 
         outputDirFrame = Tk.Frame(root)
         outputDirFrame.pack()
-        Tk.Label(outputDirFrame,text="Location to export files?").pack()
+        self.outputLocal=Tk.BooleanVar()
+        outputCheckButton=Tk.Checkbutton(outputDirFrame,text="Export files for upload?",variable=self.outputLocal,onvalue=True,offvalue=False,command=self.toggleOutput)
+        outputCheckButton.select()
+        outputCheckButton.pack()
         self.outputDirEntry=Tk.Entry(outputDirFrame)
         self.outputDirEntry.insert(0,self.outDir)
         self.outputDirEntry.pack(side=Tk.LEFT)
@@ -69,6 +72,12 @@ class TTANR:
         goButton=Tk.Button(goFrame,text="GO",command=self.go)
         goButton.pack(side=Tk.LEFT)
 
+    def toggleOutput(self):
+        if self.outputLocal.get():
+            self.outputDirEntry.config(state=Tk.NORMAL)
+        else:
+            self.outputDirEntry.config(state=Tk.DISABLED)
+            
     def toggleUrl(self):
         if self.useUrl.get():
             self.urlEntry.config(state=Tk.NORMAL)
@@ -113,9 +122,9 @@ class TTANR:
             deck=ttanr.load_netrunnerdb_deck(deckID)
 
         if self.useUrl.get():
-            ttanr.write_files(deck,self.urlEntry.get(),self.install.get())
+            ttanr.write_files(deck,self.urlEntry.get(),self.outputLocal.get(),self.outputDirEntry.get(),self.install.get())
         else:
-            ttanr.write_files(deck,"null://",self.install.get())
+            ttanr.write_files(deck,"null://",self.outputLocal.get(),self.outputDirEntry.get(),self.install.get())
 
         tkMessageBox.showinfo("ttanr","Done")
 

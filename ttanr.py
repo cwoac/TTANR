@@ -205,7 +205,7 @@ def build_deck_image(deck):
 
     return im
 
-def write_files(deck,base_url,install=False):    
+def write_files(deck,base_url,write_local,local_target,install):    
     chest=build_chest_file(deck,base_url)
     deckImage=build_deck_image(deck)
     backImage=None
@@ -215,16 +215,18 @@ def write_files(deck,base_url,install=False):
         backImage=get_runner_back()
 
     basefilename=deck['filename']
-    print("Writing %s.json" %basefilename)
-    with open(basefilename+'.json','w') as chestFile:
-        json.dump(chest,chestFile)
-
-    deckFilename=basefilename+'.jpg'
-    backFilename=basefilename+'-back.jpg'
-    print("Writing %s" % deckFilename)
-    print("Writing %s" % backFilename)
-    deckImage.save(deckFilename,'JPEG')
-    backImage.save(backFilename,'JPEG')
+    deckFilename=os.path.join(local_target,basefilename+'.jpg')
+    backFilename=os.path.join(local_target,basefilename+'-back.jpg')
+    chestFilename=os.path.join(local_target,basefilename+'.json')
+    
+    if write_local:
+        print("Writing %s" % chestFilename)
+        with open(chestFilename,'w') as chestFile:
+            json.dump(chest,chestFile)
+        print("Writing %s" % deckFilename)
+        print("Writing %s" % backFilename)
+        deckImage.save(deckFilename,'JPEG')
+        backImage.save(backFilename,'JPEG')
 
     if install:
         tts_dir=os.path.join(os.path.expanduser("~"),"Documents","My Games","Tabletop Simulator")
@@ -252,11 +254,15 @@ def main():
     group.add_argument("-n","--netrunnerdb",metavar="ID",help="Load deck from netrunnerdb using given ID.")
     group.add_argument("-o","--octgn",metavar="file",help="Load the given o8n file (in octgn format).")
     parser.add_argument("-i","--install",action="store_true",help="Install files into local TTS install.")
+    parser.add_argument("-w","--writelocal",action="store_true",help="Write files into the current directory.")
     parser.add_argument("-u","--url",help="Base url for where the images will be made availiable")
     args = parser.parse_args()
 
     if not (args.install or args.url):
-        parser.error("At least one of -i or -u is required.")
+        print("Warning: Neither install (-i) or url (-u) has been specified. You probably don't want to do this.")
+
+    if not (args.install or args.writelocal):
+        parser.error("At least one of -i or -w is required.")
 
     baseurl=args.url or "null://"
 
@@ -271,7 +277,7 @@ def main():
     if args.octgn != None:
         deck=load_octgn_deck(args.octgn)
 
-    write_files(deck,baseurl,args.install)
+    write_files(deck,baseurl,args.writelocal,"",args.install)
 
 if __name__ == "__main__":
     main()
