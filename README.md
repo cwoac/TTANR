@@ -7,9 +7,9 @@ The easiest way is via netrunnerdb. Both players create *public* decks then give
 Alternatively, don't use `-i` and put the created files up on a webserver using the `-u` parameter
 Example:
 ````
-python ttanr.py -n 12345 -i
-python ttanr.py -o my_awesome_deck.o8n -u http://myserver/decks/
-python ttanr.py -n 5438 -u http://myserver/decks/
+ttanr -n 12345 -i
+ttanr -o my_awesome_deck.o8n -u http://myserver/decks/
+ttanr -n 5438 -u http://myserver/decks/
 ````
 
 ## Notes
@@ -25,6 +25,7 @@ It will use a fixed block of red or blue for the the backs of cards. If you want
 It will only use the original card art - if you want to use alt art, figure out the netrunner card id for the card and replace cards/id.png with your file (again, *must* be 300x419)
 
 ## Requirements
+Either download a compiled exe, or run using python. In the latter case, you will need:
 - python2.7
 - untangle
 - PIL
@@ -39,4 +40,3 @@ Not committing to anything, mind. Pull reqs are welcome though.
 - alternate card image source support
 - support for flip ids
 - image resizing
-- compiled version
