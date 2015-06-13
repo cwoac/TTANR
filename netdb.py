@@ -9,6 +9,7 @@ import untangle
 import random
 import string
 import argparse
+import shutil
 
 cards={}
 imgW=300
@@ -18,6 +19,12 @@ def sanitise_filename(filename):
     # remove unprintable characters from a filename
     valid_chars = "-_.()%s%s" % (string.ascii_letters, string.digits)
     return ''.join(c for c in filename if c in valid_chars)
+
+def tts_filename(filename):
+    # Convert a filename to TTS format.
+    valid_chars = "%s%s" % (string.ascii_letters, string.digits)
+    return ''.join(c for c in filename if c in valid_chars)
+    
 
 def gen_guid():
     # generate a random 6 char hex string
@@ -47,8 +54,8 @@ def build_chest_file(deck,base_url):
             "posY": 0,
             "posZ": 0,
             "rotX": 0,
-            "rotY": 0,
-            "rotZ": 180.0,
+            "rotY": 90 if deck['side']=='Corp' else 0,
+            "rotZ": 180,
             "scaleX": 1.75,
             "scaleY": 1.75,
             "scaleZ": 1.75
@@ -182,8 +189,8 @@ def build_deck_image(deck):
 
     return im
 
-def write_files(deck,base_path):
-    chest=build_chest_file(deck,base_path)
+def write_files(deck,base_url,install=False):    
+    chest=build_chest_file(deck,base_url)
     deckImage=build_deck_image(deck)
     backImage=None
     if deck['side']=='Corp':
@@ -195,16 +202,45 @@ def write_files(deck,base_path):
     with open(basefilename+'.json','w') as chestFile:
         json.dump(chest,chestFile)
 
-    deckImage.save(basefilename+'.jpg','JPEG')
-    backImage.save(basefilename+'-back.jpg','JPEG')
+    deckFilename=basefilename+'.jpg'
+    backFilename=basefilename+'-back.jpg'
+    deckImage.save(deckFilename,'JPEG')
+    backImage.save(backFilename,'JPEG')
+
+    if install:
+        tts_dir=os.path.join(os.path.expanduser("~"),"Documents","My Games","Tabletop Simulator")
+        tts_chest_dir=os.path.join(tts_dir,"Saves","Chest")
+        tts_image_dir=os.path.join(tts_dir,"Mods","Images")
+
+        with open(os.path.join(tts_chest_dir,basefilename+'.json'),'w') as chestFile:
+            json.dump(chest,chestFile)
+
+        ttsDeckFilename=os.path.join(tts_image_dir,tts_filename(base_url+deckFilename)+'.jpg')
+        ttsBackFilename=os.path.join(tts_image_dir,tts_filename(base_url+backFilename)+'.jpg')
+        print ttsDeckFilename        
+        deckImage.save(ttsDeckFilename,'JPEG')
+        print ttsBackFilename
+        backImage.save(ttsBackFilename,'JPEG')
+        
+
+    
 
 def main():
     parser = argparse.ArgumentParser(description="Create a set of files for loading ANR decks into TableTop Simulator")
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("-n","--netrunnerdb",metavar="ID",help="Load deck from netrunnerdb using given ID.")
     group.add_argument("-o","--octgn",metavar="file",help="Load the given o8n file (in octgn format).")
-    parser.add_argument("baseurl",help="Base url for where the images will be made availiable")
+    group2 = parser.add_mutually_exclusive_group(required=True)
+    group2.add_argument("-i","--install",action="store_true",help="Install files into local TTS install.")
+    group2.add_argument("-u","--url",help="Base url for where the images will be made availiable")
     args = parser.parse_args()
+
+    baseurl=args.url or "null://"
+
+    if baseurl.startswith('file') and not baseurl.endswith(os.sep):
+        baseurl+=os.sep
+    if baseurl.startswith('http') and not baseurl.endswith('/'):
+        baseurl+='/'
 
     deck=None
     if args.netrunnerdb != None:
@@ -212,8 +248,8 @@ def main():
     if args.octgn != None:
         deck=load_octgn_deck(args.octgn)
 
-    write_files(deck,args.baseurl)
-
+    print baseurl
+    write_files(deck,baseurl,args.install)
 
 if __name__ == "__main__":
     main()
