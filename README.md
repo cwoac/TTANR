@@ -7,9 +7,9 @@ The easiest way is via netrunnerdb. Both players create *public* decks then give
 Alternatively, don't use `-i` and put the created files up on a webserver using the `-u` parameter
 Example:
 ````
-python netdb.py -n 12345 -i
-python netdb.py -o my_awesome_deck.o8n -u http://myserver/decks/
-python netdb.py -n 5438 -u http://myserver/decks/
+python ttanr.py -n 12345 -i
+python ttanr.py -o my_awesome_deck.o8n -u http://myserver/decks/
+python ttanr.py -n 5438 -u http://myserver/decks/
 ````
 
 ## Notes
