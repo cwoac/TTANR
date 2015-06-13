@@ -1,7 +1,13 @@
 # TTANR
 ANR deck image creator for TableTop Simulator, working from either octgn format files (`.o8n`) or netrunnerdb decks (public decks only).
 
+## Quickstart
+
+download `ttanr_gui.exe`. Run it, enter a netrunnerdb deck id, click go. Run Tabletop Simulator and look in the chest for the deck. Optionally, create `cards/corp-back.png` and `cards/runner-back.png` at 300x419 to get fancy card backs.
+
 ## Usage
+
+For the cli, use either `ttanr.exe` or `python ttanr.py`; for the gui, `ttanr_gui.exe` or `python ttanr_gui.py`
 
 The easiest way is via netrunnerdb. Both players create *public* decks then give the id to the other. Each then uses `-i` to automatically install the files into their TTS saved directory.
 Alternatively, don't use `-i` and put the created files up on a webserver using the `-u` parameter
@@ -34,7 +40,6 @@ Either download a compiled exe, or run using python. In the latter case, you wil
 
 ## TODO
 Not committing to anything, mind. Pull reqs are welcome though.
-- GUI
 - private netrunnerdb support
 - alternate art
 - alternate card image source support
