@@ -54,7 +54,7 @@ def build_chest_file(deck,base_url):
             "posY": 0,
             "posZ": 0,
             "rotX": 0,
-            "rotY": 90 if deck['side']=='Corp' else 0,
+            "rotY": 90 if deck['side']=='Corp' else 180,
             "rotZ": 180,
             "scaleX": 1.75,
             "scaleY": 1.75,
@@ -230,10 +230,12 @@ def main():
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("-n","--netrunnerdb",metavar="ID",help="Load deck from netrunnerdb using given ID.")
     group.add_argument("-o","--octgn",metavar="file",help="Load the given o8n file (in octgn format).")
-    group2 = parser.add_mutually_exclusive_group(required=True)
-    group2.add_argument("-i","--install",action="store_true",help="Install files into local TTS install.")
-    group2.add_argument("-u","--url",help="Base url for where the images will be made availiable")
+    parser.add_argument("-i","--install",action="store_true",help="Install files into local TTS install.")
+    parser.add_argument("-u","--url",help="Base url for where the images will be made availiable")
     args = parser.parse_args()
+
+    if not (args.install or args.url):
+        parser.error("At least one of -i or -u is required.")
 
     baseurl=args.url or "null://"
 
@@ -248,7 +250,6 @@ def main():
     if args.octgn != None:
         deck=load_octgn_deck(args.octgn)
 
-    print baseurl
     write_files(deck,baseurl,args.install)
 
 if __name__ == "__main__":
