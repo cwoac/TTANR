@@ -14,6 +14,7 @@ import shutil
 cards={}
 imgW=300
 imgH=419
+debug=True
 
 def sanitise_filename(filename):
     # remove unprintable characters from a filename
@@ -105,7 +106,7 @@ def get_card(id):
         filename = os.path.join("cards",id+".json")
         if not os.path.isfile(filename):
             make_cache_dir()
-            print "downloading card id: %s" % id
+            print "Downloading card id: %s" % id
             data=urllib.urlopen("http://netrunnerdb.com/api/card/%s" % id).read()
             fh=open(filename,'w')
             fh.write(data)
@@ -119,7 +120,7 @@ def get_image(id):
     filename = os.path.join("cards",id+".png")
     if not os.path.isfile(filename):
         make_cache_dir()
-        print "Downloading %s" % filename
+        print "Downloading card image: %s" % filename
         card=get_card(id)
         data=urllib.urlopen("http://netrunnerdb.com/%s" % card['imagesrc']).read()
         fh=open(filename,'wb')
@@ -127,7 +128,16 @@ def get_image(id):
         fh.close()
     return PIL.Image.open(filename)
 
+def print_deck(deck):
+    print('''
+    Deck: %s
+    Filename: %s
+    Side: %s
+    Size: %s
+    ''' % ( deck['name'],deck['filename'],deck['side'],count_deck(deck)))
+
 def load_netrunnerdb_deck(id):
+    print("Attempting to load deck %s from netrunnerdb" % id )
     data=urllib.urlopen("http://netrunnerdb.com/api/decklist/%s" % id).read()
     j_data=json.loads(data)
 
@@ -145,10 +155,13 @@ def load_netrunnerdb_deck(id):
         else:
             deck['cards'].append((id,j_data['cards'][id]))
 
+    if debug:
+        print_deck(deck)
     return deck
 
 
 def load_octgn_deck(filename):
+    print("Attempting to load octgn deck from %s" % filename )
     deckXML = untangle.parse(filename)
     deck={
         'cards':[],
@@ -163,6 +176,9 @@ def load_octgn_deck(filename):
     # add the rest
     for card in deckXML.deck.section[1].card:
         deck['cards'].append((card['id'][-5:],int(card['qty'])))
+
+    if debug:
+        print_deck(deck)
     return deck
 
 def build_deck_image(deck):
@@ -199,11 +215,14 @@ def write_files(deck,base_url,install=False):
         backImage=get_runner_back()
 
     basefilename=deck['filename']
+    print("Writing %s.json" %basefilename)
     with open(basefilename+'.json','w') as chestFile:
         json.dump(chest,chestFile)
 
     deckFilename=basefilename+'.jpg'
     backFilename=basefilename+'-back.jpg'
+    print("Writing %s" % deckFilename)
+    print("Writing %s" % backFilename)
     deckImage.save(deckFilename,'JPEG')
     backImage.save(backFilename,'JPEG')
 
@@ -212,14 +231,16 @@ def write_files(deck,base_url,install=False):
         tts_chest_dir=os.path.join(tts_dir,"Saves","Chest")
         tts_image_dir=os.path.join(tts_dir,"Mods","Images")
 
-        with open(os.path.join(tts_chest_dir,basefilename+'.json'),'w') as chestFile:
+        tts_chest_name=os.path.join(tts_chest_dir,basefilename+'.json')
+        print("Writing %s" % tts_chest_name)
+        with open(tts_chest_name,'w') as chestFile:
             json.dump(chest,chestFile)
 
         ttsDeckFilename=os.path.join(tts_image_dir,tts_filename(base_url+deckFilename)+'.jpg')
         ttsBackFilename=os.path.join(tts_image_dir,tts_filename(base_url+backFilename)+'.jpg')
-        print ttsDeckFilename        
+        print("Writing %s" % ttsDeckFilename)        
         deckImage.save(ttsDeckFilename,'JPEG')
-        print ttsBackFilename
+        print("Writing %s" % ttsBackFilename)
         backImage.save(ttsBackFilename,'JPEG')
         
 
