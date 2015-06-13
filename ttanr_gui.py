@@ -70,7 +70,7 @@ class TTANR:
         goButton.pack(side=Tk.LEFT)
 
     def toggleUrl(self):
-        if self.useUrl.get():
+        if self.useUrl.get()==True:
             self.urlEntry.config(state=Tk.NORMAL)
         else:
             self.urlEntry.config(state=Tk.DISABLED)
@@ -107,7 +107,7 @@ class TTANR:
     def go(self):
         deckID=self.deckEntry.get()
         deck=None
-        if self.chooseO8N:
+        if self.chooseO8N==True:
             deck=ttanr.load_octgn_deck(self.deckFile)
         else:
             deck=ttanr.load_netrunnerdb_deck(deckID)
