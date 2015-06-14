@@ -41,5 +41,4 @@ Not committing to anything, mind. Pull reqs are welcome though.
 - private netrunnerdb support
 - alternate art
 - alternate card image source support
-- support for flip ids
 - image resizing

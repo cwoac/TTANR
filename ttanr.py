@@ -79,6 +79,15 @@ def build_chest_file(deck,base_url):
          }]
     }
 
+    # check for special exceptions
+    if deck['jinteki-biotech']:
+        chest['ObjectStates'][0]['CustomDeck']['2']= {
+                "FaceURL":base_url+'08012-id.jpg',
+                "BackURL":base_url+'08012-id-back.jpg'
+            }
+        chest['ObjectStates'][0]['DeckIDs']=[200,201,202]+chest['ObjectStates'][0]['DeckIDs']
+    print chest
+ 
     return chest
 
 def make_cache_dir():
@@ -116,6 +125,31 @@ def get_card(id):
         cards[id]=j_data[0]
     return cards[id]
 
+def get_flip_image(id,idx):
+    if id!='08012':
+        print("Unknown flip id %s" % id )
+        return
+    if idx!='A' and idx!='B' and idx!='C':
+        print("Unknown flip index %s for %s" % (idx,id) )
+        return
+    filename = os.path.join("cards",id+idx+".png")
+    if not os.path.isfile(filename):
+        make_cache_dir()
+        print "Downloading card image: %s" % filename
+        # TODO: figure out a better way of doing this.
+        data=None
+        if idx=='A':
+            data=urllib.urlopen("http://vignette2.wikia.nocookie.net/ancur/images/9/96/08012A.png").read()
+        if idx=='B':
+            data=urllib.urlopen("http://vignette3.wikia.nocookie.net/ancur/images/6/6a/08012B.png").read()
+        if idx=='C':
+            data=urllib.urlopen("http://vignette3.wikia.nocookie.net/ancur/images/a/a1/08012C.png").read()
+        fh=open(filename,'wb')
+        fh.write(data)
+        fh.close()
+    return PIL.Image.open(filename)
+
+
 def get_image(id):
     filename = os.path.join("cards",id+".png")
     if not os.path.isfile(filename):
@@ -144,13 +178,17 @@ def load_netrunnerdb_deck(id):
     deck={
         'name':j_data['name'],
         'cards':[],
-        'filename':sanitise_filename(j_data['name'])
+        'filename':sanitise_filename(j_data['name']),
+        'jinteki-biotech':False
     }
 
     for id in j_data['cards'].keys():
         card=get_card(id)
         if card['type_code']=='identity':
-            deck['cards'].insert(0,(id,1))
+            if id=='08012':
+                deck['jinteki-biotech']=True
+            else:
+                deck['cards'].insert(0,(id,1))
             deck['side']=card['side']
         else:
             deck['cards'].append((id,j_data['cards'][id]))
@@ -165,13 +203,17 @@ def load_octgn_deck(filename):
     deckXML = untangle.parse(filename)
     deck={
         'cards':[],
-        'name':os.path.splitext(os.path.basename(filename))[0]
+        'name':os.path.splitext(os.path.basename(filename))[0],
+        'jinteki-biotech':False
     }
     # add id
     id=deckXML.deck.section[0].card['id'][-5:]
+    if id=='08012':
+        deck['jinteki-biotech']=True
+    else:
+        deck['cards'].append((id,1))
     idcard=get_card(id)
     deck['side']=idcard['side']
-    deck['cards'].append((id,1))
     deck['filename']=sanitise_filename(deck['name'])
     # add the rest
     for card in deckXML.deck.section[1].card:
@@ -180,6 +222,22 @@ def load_octgn_deck(filename):
     if debug:
         print_deck(deck)
     return deck
+
+def build_08012_image():
+    # build mini-deck for flip ID Jinteki Biotech
+    im = PIL.Image.new('RGBA',(10*imgW,7*imgH),(0,0,0,0))
+    offX=0
+    image=get_flip_image('08012','A')
+    im.paste(image,(offX,0))
+    offX+=imgW
+    image=get_flip_image('08012','B')
+    im.paste(image,(offX,0))
+    offX+=imgW
+    image=get_flip_image('08012','C')
+    im.paste(image,(offX,0))
+    back=get_image('08012')
+    im.paste(back,(2700,2514))
+    return im
 
 def build_deck_image(deck):
     # first build the output file
@@ -208,6 +266,13 @@ def build_deck_image(deck):
 def write_files(deck,base_url,write_local,local_target,install):    
     chest=build_chest_file(deck,base_url)
     deckImage=build_deck_image(deck)
+    deck2Image=None
+
+
+    if deck['jinteki-biotech']:
+        jbDeckImage=build_08012_image()
+        jbBackImage=get_image('08012').convert('RGB')
+        
     backImage=None
     if deck['side']=='Corp':
         backImage=get_corp_back()
@@ -215,6 +280,8 @@ def write_files(deck,base_url,write_local,local_target,install):
         backImage=get_runner_back()
 
     basefilename=deck['filename']
+    jbDeckFilename=os.path.join(local_target,"08012-id.jpg")
+    jbBackFilename=os.path.join(local_target,"08012-id-back.jpg")
     deckFilename=os.path.join(local_target,basefilename+'.jpg')
     backFilename=os.path.join(local_target,basefilename+'-back.jpg')
     chestFilename=os.path.join(local_target,basefilename+'.json')
@@ -227,6 +294,11 @@ def write_files(deck,base_url,write_local,local_target,install):
         print("Writing %s" % backFilename)
         deckImage.save(deckFilename,'JPEG')
         backImage.save(backFilename,'JPEG')
+        if deck['jinteki-biotech']:
+            print("Writing %s" % jbDeckFilename)
+            print("Writing %s" % jbBackFilename)
+            jbDeckImage.save(jbDeckFilename,'JPEG')
+            jbBackImage.save(jbBackFilename,'JPEG')
 
     if install:
         tts_dir=os.path.join(os.path.expanduser("~"),"Documents","My Games","Tabletop Simulator")
@@ -244,7 +316,13 @@ def write_files(deck,base_url,write_local,local_target,install):
         deckImage.save(ttsDeckFilename,'JPEG')
         print("Writing %s" % ttsBackFilename)
         backImage.save(ttsBackFilename,'JPEG')
-        
+        if deck['jinteki-biotech']:
+            ttsJbDeckFilename=os.path.join(tts_image_dir,tts_filename(base_url+jbDeckFilename)+'.jpg')
+            ttsJbBackFilename=os.path.join(tts_image_dir,tts_filename(base_url+jbBackFilename)+'.jpg')
+            print("Writing %s" % ttsJbDeckFilename)        
+            jbDeckImage.save(ttsJbDeckFilename,'JPEG')
+            print("Writing %s" % ttsJbBackFilename)
+            jbBackImage.save(ttsJbBackFilename,'JPEG')
 
     
 
