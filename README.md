@@ -10,12 +10,12 @@ download `ttanr_gui.exe` from the [releases](https://github.com/cwoac/TTANR/rele
 For the cli, use either `ttanr.exe` or `python ttanr.py`; for the gui, `ttanr_gui.exe` or `python ttanr_gui.py`
 
 The easiest way is via netrunnerdb. Both players create *public* decks then give the id to the other. Each then uses `-i` to automatically install the files into their TTS saved directory.
-Alternatively, don't use `-i` and put the created files up on a webserver using the `-u` parameter
+Alternatively, don't use `-i` and put the created files up on a webserver using the `-w` and `-u` parameters
 Example:
 ````
 ttanr -n 12345 -i
-ttanr -o my_awesome_deck.o8n -u http://myserver/decks/
-ttanr -n 5438 -u http://myserver/decks/
+ttanr -o my_awesome_deck.o8n -u http://myserver/decks/ -w
+ttanr -n 5438 -u http://myserver/decks/ -w
 ````
 
 ## Notes
