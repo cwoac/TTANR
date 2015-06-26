@@ -260,6 +260,18 @@ def build_08012_image():
     im.paste(back,(2700,2514))
     return im
 
+def load_anr_back(deck):
+    back=None
+    if deck['back_filename']:
+        print "loading custom back %s" % deck['back_filename']
+        back=load_image_at_size(deck['back_filename'])
+    else:
+        if deck['side']=='Corp':
+            back=get_corp_back()
+        else:
+            back=get_runner_back()
+    return back
+
 def build_deck_image(deck):
     # first build the output file
     im = PIL.Image.new('RGBA',(10*imgW,7*imgH),(0,0,0,0))
@@ -274,11 +286,7 @@ def build_deck_image(deck):
             curImg+=1
 
     # what side is this?
-    back=None
-    if deck['side']=='Corp':
-        back=get_corp_back()
-    else:
-        back=get_runner_back()
+    back=load_anr_back(deck)
 
     im.paste(back,(2700,2514))
 
@@ -292,13 +300,9 @@ def write_files(deck,base_url,write_local,local_target,install):
 
     if deck['jinteki-biotech']:
         jbDeckImage=build_08012_image()
-        jbBackImage=get_image('08012').convert('RGB')
+        jbBackImage=get_image('08012')
 
-    backImage=None
-    if deck['side']=='Corp':
-        backImage=get_corp_back()
-    else:
-        backImage=get_runner_back()
+    backImage=load_anr_back(deck)
 
     basefilename=deck['filename']
     jbDeckFilename=os.path.join(local_target,"08012-id.jpg")
@@ -352,6 +356,7 @@ def main():
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("-n","--netrunnerdb",metavar="ID",help="Load deck from netrunnerdb using given ID.")
     group.add_argument("-o","--octgn",metavar="file",help="Load the given o8n file (in octgn format).")
+    parser.add_argument("-b","--back",metavar="background image file",help="Override default back with given file.")
     parser.add_argument("-i","--install",action="store_true",help="Install files into local TTS install.")
     parser.add_argument("-w","--writelocal",action="store_true",help="Write files into the current directory.")
     parser.add_argument("-u","--url",help="Base url for where the images will be made availiable")
@@ -376,6 +381,7 @@ def main():
     if args.octgn != None:
         deck=load_octgn_deck(args.octgn)
 
+    deck['back_filename']=args.back
     write_files(deck,baseurl,args.writelocal,"",args.install)
 
 if __name__ == "__main__":
