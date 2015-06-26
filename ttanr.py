@@ -25,15 +25,36 @@ def tts_filename(filename):
     # Convert a filename to TTS format.
     valid_chars = "%s%s" % (string.ascii_letters, string.digits)
     return ''.join(c for c in filename if c in valid_chars)
-    
+
 
 def gen_guid():
     # generate a random 6 char hex string
     return ''.join([random.choice('0123456789abcdef') for x in range(6)])
 
-
 def count_deck(deck):
     return sum([qty for _,qty in deck['cards']])
+
+def load_image_at_size(filename):
+    # load an image, forcing the colourspace and resizing if required.
+    img=PIL.Image.open(filename).convert("RGB")
+    w,h=img.size
+    if w==imgW and h==imgH:
+      # already the right size
+      return img
+    w_scale=(1.0*imgW)/w
+    h_scale=(1.0*imgH)/h
+    scale=min(h_scale,w_scale)
+    newW=int(w*scale)
+    newH=int(h*scale)
+    img=img.resize((newW,newH),PIL.Image.ANTIALIAS)
+    if newW==imgW and newH==imgH:
+      # was the correct aspect ratio
+      return img
+    # create a new black image of the correct size.
+    out=PIL.Image.new('RGBA',(imgW,imgH),(0,0,0,255))
+    # TODO: center image
+    out.paste(img,(0,0))
+    return out
 
 def build_chest_file(deck,base_url):
     # much of this is fixed.
@@ -87,7 +108,7 @@ def build_chest_file(deck,base_url):
             }
         chest['ObjectStates'][0]['DeckIDs']=[200,201,202]+chest['ObjectStates'][0]['DeckIDs']
     print chest
- 
+
     return chest
 
 def make_cache_dir():
@@ -97,7 +118,7 @@ def make_cache_dir():
 def get_runner_back():
     filename = os.path.join("cards","runner-back.png")
     if os.path.isfile(filename):
-        return PIL.Image.open(filename)
+        return load_image_at_size(filename)
     print "No image back found, generating one"
     print "Create cards/runner-back.png to avoid this message."
     return PIL.Image.new('RGBA',(imgW,imgH),(255,0,0,255))
@@ -105,7 +126,7 @@ def get_runner_back():
 def get_corp_back():
     filename = os.path.join("cards","corp-back.png")
     if os.path.isfile(filename):
-        return PIL.Image.open(filename)
+        return load_image_at_size(filename)
     print "No image back found, generating one"
     print "Create cards/corp-back.png to avoid this message."
     return PIL.Image.new('RGBA',(imgW,imgH),(0,0,255,255))
@@ -147,7 +168,7 @@ def get_flip_image(id,idx):
         fh=open(filename,'wb')
         fh.write(data)
         fh.close()
-    return PIL.Image.open(filename)
+    return load_image_at_size(filename)
 
 
 def get_image(id):
@@ -160,7 +181,7 @@ def get_image(id):
         fh=open(filename,'wb')
         fh.write(data)
         fh.close()
-    return PIL.Image.open(filename)
+    return load_image_at_size(filename)
 
 def print_deck(deck):
     print('''
@@ -263,7 +284,7 @@ def build_deck_image(deck):
 
     return im
 
-def write_files(deck,base_url,write_local,local_target,install):    
+def write_files(deck,base_url,write_local,local_target,install):
     chest=build_chest_file(deck,base_url)
     deckImage=build_deck_image(deck)
     deck2Image=None
@@ -272,7 +293,7 @@ def write_files(deck,base_url,write_local,local_target,install):
     if deck['jinteki-biotech']:
         jbDeckImage=build_08012_image()
         jbBackImage=get_image('08012').convert('RGB')
-        
+
     backImage=None
     if deck['side']=='Corp':
         backImage=get_corp_back()
@@ -285,7 +306,7 @@ def write_files(deck,base_url,write_local,local_target,install):
     deckFilename=os.path.join(local_target,basefilename+'.jpg')
     backFilename=os.path.join(local_target,basefilename+'-back.jpg')
     chestFilename=os.path.join(local_target,basefilename+'.json')
-    
+
     if write_local:
         print("Writing %s" % chestFilename)
         with open(chestFilename,'w') as chestFile:
@@ -312,19 +333,19 @@ def write_files(deck,base_url,write_local,local_target,install):
 
         ttsDeckFilename=os.path.join(tts_image_dir,tts_filename(base_url+deckFilename)+'.jpg')
         ttsBackFilename=os.path.join(tts_image_dir,tts_filename(base_url+backFilename)+'.jpg')
-        print("Writing %s" % ttsDeckFilename)        
+        print("Writing %s" % ttsDeckFilename)
         deckImage.save(ttsDeckFilename,'JPEG')
         print("Writing %s" % ttsBackFilename)
         backImage.save(ttsBackFilename,'JPEG')
         if deck['jinteki-biotech']:
             ttsJbDeckFilename=os.path.join(tts_image_dir,tts_filename(base_url+jbDeckFilename)+'.jpg')
             ttsJbBackFilename=os.path.join(tts_image_dir,tts_filename(base_url+jbBackFilename)+'.jpg')
-            print("Writing %s" % ttsJbDeckFilename)        
+            print("Writing %s" % ttsJbDeckFilename)
             jbDeckImage.save(ttsJbDeckFilename,'JPEG')
             print("Writing %s" % ttsJbBackFilename)
             jbBackImage.save(ttsJbBackFilename,'JPEG')
 
-    
+
 
 def main():
     parser = argparse.ArgumentParser(description="Create a set of files for loading ANR decks into TableTop Simulator")
