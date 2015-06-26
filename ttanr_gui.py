@@ -9,6 +9,8 @@ import os.path
 class TTANR:
     def __init__(self,root):
         self.root=root
+        self.backFile=None
+        self.deckFile=None
         self.outDir= os.path.join(os.path.expanduser("~"),"Documents")
 
         inputFrame=Tk.Frame(root)
@@ -28,7 +30,7 @@ class TTANR:
         self.o8nEntry.pack(side=Tk.LEFT)
         self.o8nButton=Tk.Button(o8nFrame,text="Browse",command=self.pickO8NFile)
         self.o8nButton.pack(side=Tk.LEFT)
-        
+
         numberFrame = Tk.Frame(root)
         numberFrame.pack()
         Tk.Label(numberFrame,text="Enter netrunnerdb # to import").pack()
@@ -37,6 +39,18 @@ class TTANR:
 
         ndbRButton.select()
         ndbRButton.invoke()
+
+        backFrame=Tk.Frame(root)
+        backFrame.pack()
+        self.customBack=Tk.BooleanVar()
+        customBackButton=Tk.Checkbutton(backFrame,text="Custom back image?",variable=self.customBack,onvalue=True,offvalue=False,command=self.toggleBack)
+        customBackButton.pack()
+        self.customBackEntry=Tk.Entry(backFrame)
+        self.customBackEntry.pack(side=Tk.LEFT)
+        self.customBackFileButton=Tk.Button(backFrame,text="Browse",command=self.pickBackFile)
+        self.customBackFileButton.pack(side=Tk.LEFT)
+        self.toggleBack()
+
 
         outputDirFrame = Tk.Frame(root)
         outputDirFrame.pack()
@@ -47,8 +61,8 @@ class TTANR:
         self.outputDirEntry=Tk.Entry(outputDirFrame)
         self.outputDirEntry.insert(0,self.outDir)
         self.outputDirEntry.pack(side=Tk.LEFT)
-        outputDirButton=Tk.Button(outputDirFrame,text="Browse",command=self.pickOutputDir)
-        outputDirButton.pack(side=Tk.LEFT)
+        self.outputDirButton=Tk.Button(outputDirFrame,text="Browse",command=self.pickOutputDir)
+        self.outputDirButton.pack(side=Tk.LEFT)
 
         urlFrame = Tk.Frame(root)
         urlFrame.pack()
@@ -75,9 +89,19 @@ class TTANR:
     def toggleOutput(self):
         if self.outputLocal.get():
             self.outputDirEntry.config(state=Tk.NORMAL)
+            self.outputDirButton.config(state=Tk.NORMAL)
         else:
             self.outputDirEntry.config(state=Tk.DISABLED)
-            
+            self.outputDirButton.config(state=Tk.DISABLED)
+
+    def toggleBack(self):
+        if self.customBack.get():
+            self.customBackEntry.config(state=Tk.NORMAL)
+            self.customBackFileButton.config(state=Tk.NORMAL)
+        else:
+            self.customBackEntry.config(state=Tk.DISABLED)
+            self.customBackFileButton.config(state=Tk.DISABLED)
+
     def toggleUrl(self):
         if self.useUrl.get():
             self.urlEntry.config(state=Tk.NORMAL)
@@ -103,7 +127,16 @@ class TTANR:
             title='Choose deck file')
         self.o8nEntry.delete(0,Tk.END)
         self.o8nEntry.insert(0,self.deckFile)
-    
+
+    def pickBackFile(self):
+        self.backFile=tkFileDialog.askopenfilename(
+            parent=self.root,
+            initialdir=os.path.join(os.path.expanduser("~"),"Downloads"),
+            filetypes=[('JPEG files','*.jpg'),('PNG files','*.png')],
+            title='Choose background image file')
+        self.customBackEntry.delete(0,Tk.END)
+        self.customBackEntry.insert(0,self.backFile)
+
     def pickOutputDir(self):
         self.outDir=tkFileDialog.askdirectory(
             parent=self.master,
@@ -120,6 +153,8 @@ class TTANR:
             deck=ttanr.load_octgn_deck(self.deckFile)
         else:
             deck=ttanr.load_netrunnerdb_deck(deckID)
+
+        deck['back_filename']=self.backFile
 
         if self.useUrl.get():
             ttanr.write_files(deck,self.urlEntry.get(),self.outputLocal.get(),self.outputDirEntry.get(),self.install.get())

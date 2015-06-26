@@ -356,7 +356,7 @@ def main():
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument("-n","--netrunnerdb",metavar="ID",help="Load deck from netrunnerdb using given ID.")
     group.add_argument("-o","--octgn",metavar="file",help="Load the given o8n file (in octgn format).")
-    parser.add_argument("-b","--back",metavar="background image file",help="Override default back with given file.")
+    parser.add_argument("-b","--back",metavar="backgroundFile",help="Override default back with given file.")
     parser.add_argument("-i","--install",action="store_true",help="Install files into local TTS install.")
     parser.add_argument("-w","--writelocal",action="store_true",help="Write files into the current directory.")
     parser.add_argument("-u","--url",help="Base url for where the images will be made availiable")
