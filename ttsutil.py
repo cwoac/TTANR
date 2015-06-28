@@ -41,8 +41,11 @@ def count_deck(deck):
   return sum([qty for _,qty in deck['cards']])
 
 def get_image(card_name,game=None):
-  card_filename=make_filename(card_name+".png",game)
-  return load_image_at_size(card_filename)
+  for image_format in ['.png','.jpg','.bmp']:
+    card_filename=make_filename(card_name+image_format,game)
+    if os.path.isfile(card_filename):
+      return load_image_at_size(card_filename)
+  print("Unable to find image for %s (in %s)" % (card_name,game))
 
 
 def load_image_at_size(filename):
