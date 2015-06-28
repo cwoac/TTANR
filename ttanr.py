@@ -73,8 +73,7 @@ def get_card(id):
         if not os.path.isfile(image_filename):
           make_cache_dir()
           print "Downloading card image: %s" % image_filename
-          card=get_card(id)
-          data=urllib.urlopen("http://netrunnerdb.com/%s" % card['imagesrc']).read()
+          data=urllib.urlopen("http://netrunnerdb.com/%s" % j_data[0]['imagesrc']).read()
           fh=open(image_filename,'wb')
           fh.write(data)
           fh.close()
