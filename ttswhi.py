@@ -24,7 +24,7 @@ def get_card(id):
   if not os.path.isfile(filename):
     make_cache_dir()
     print("Downloading card: %s" % id)
-    data=urllib.urlopen("http://deckbox.org/whi/%s" % id).read()
+    data=urllib.urlopen("https://deckbox.org/whi/%s" % id).read()
     soup=BeautifulSoup.BeautifulSoup(data)
     url="http://deckbox.org/%s" % soup.findAll('img',{'id':'card_image'})[0]['src']
     image=urllib.urlopen(url).read()
@@ -34,7 +34,7 @@ def get_card(id):
 
 def load_deckbox_deck(id):
   print("Attempting to load deck %s from deckbox" % id)
-  html=urllib.urlopen("http://deckbox.org/sets/%s" % id).read()
+  html=urllib.urlopen("https://deckbox.org/sets/%s" % id).read()
   soup=BeautifulSoup.BeautifulSoup(html)
   name = soup.head.title.contents[0].replace("&#x27;","'").split(" - ")[0]
   print("Found deck '%s'" % name )
@@ -45,7 +45,7 @@ def load_deckbox_deck(id):
     'back_filename':None
   }
   print("Loading deck contents")
-  data=urllib.urlopen("http://deckbox.org/sets/%s/export" % id).read()
+  data=urllib.urlopen("https://deckbox.org/sets/%s/export" % id).read()
   soup=BeautifulSoup.BeautifulSoup(data)
   for line in soup.body.childGenerator():
     if not isinstance(line,BeautifulSoup.NavigableString):
@@ -59,6 +59,10 @@ def load_deckbox_deck(id):
     deck['cards'].append((name,count))
   return deck
 
+def get_back():
+  image=ttsutil.get_image('whi-back',game) or PIL.Image.new('RGBA',(ttsutil.imgW,ttsutil.imgH),(0,255,0,255))
+  return image
+
 def write_files(deck,base_url,write_local,local_target,install):
   chest=ttsutil.build_chest_file(deck,base_url)
   back_image=None
@@ -66,7 +70,7 @@ def write_files(deck,base_url,write_local,local_target,install):
     print "loading custom back %s" % deck['back_filename']
     back_image=ttsutil.load_image_at_size(deck['back_filename'])
   else:
-    back_image=PIL.Image.new('RGBA',(ttsutil.imgW,ttsutil.imgH),(0,255,0,255))
+    back_image=get_back()
   ttsutil.write_files(deck,chest,base_url,write_local,local_target,install,back_image,game)
 
 def main():

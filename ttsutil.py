@@ -46,6 +46,7 @@ def get_image(card_name,game=None):
     if os.path.isfile(card_filename):
       return load_image_at_size(card_filename)
   print("Unable to find image for %s (in %s)" % (card_name,game))
+  return None
 
 
 def load_image_at_size(filename):
@@ -160,8 +161,8 @@ def write_files(deck,chest,base_url,write_local,local_target,install,back_image,
     with open(tts_chest_name,'w') as chest_file:
       json.dump(chest,chest_file)
 
-    tts_deck_filename=os.path.join(tts_image_dir,tts_filename(base_url+deck_filename)+'.jpg')
-    tts_back_filename=os.path.join(tts_image_dir,tts_filename(base_url+back_filename)+'.jpg')
+    tts_deck_filename=os.path.join(tts_image_dir,tts_filename(base_url+base_filename+'.jpg')+'.jpg')
+    tts_back_filename=os.path.join(tts_image_dir,tts_filename(base_url+base_filename+'-back.jpg')+'.jpg')
     print("Writing %s" % tts_deck_filename)
     deck_image.save(tts_deck_filename,'JPEG')
     print("Writing %s" % tts_back_filename)
