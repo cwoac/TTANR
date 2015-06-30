@@ -6,3 +6,5 @@ cards
 *.spec
 build
 dist
+*.swp
+*~
