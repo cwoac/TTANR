@@ -1,7 +1,7 @@
 # TTS utils
 A set of gui+cli programs for creating [Tabletop Simulator](http://berserk-games.com/) decks.
 
-## TTANR
+## TTSANR
 ANR deck image creator, working from either octgn format files (`.o8n`) or netrunnerdb decks (public decks only).
 
 ### Quickstart
@@ -16,9 +16,9 @@ The easiest way is via netrunnerdb. Both players create *public* decks then give
 Alternatively, don't use `-i` and put the created files up on a webserver using the `-w` and `-u` parameters
 Example:
 ````
-ttanr -n 12345 -i
-ttanr -o my_awesome_deck.o8n -u http://myserver/decks/ -w
-ttanr -n 5438 -u http://myserver/decks/ -w
+ttsanr -n 12345 -i
+ttsanr -o my_awesome_deck.o8n -u http://myserver/decks/ -w
+ttsanr -n 5438 -u http://myserver/decks/ -w
 ````
 
 ## TTSWHI

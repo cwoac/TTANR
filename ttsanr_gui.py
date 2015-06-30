@@ -1,12 +1,12 @@
 #!/usr/bin/env python27
 
-import ttanr
+import ttsanr
 import Tkinter as Tk
 import tkFileDialog
 import tkMessageBox
 import os.path
 
-class TTANR:
+class TTSANR:
     def __init__(self,root):
         self.root=root
         self.backFile=None
@@ -150,24 +150,24 @@ class TTANR:
         deckID=self.deckEntry.get()
         deck=None
         if self.chooseO8N.get():
-            deck=ttanr.load_octgn_deck(self.deckFile)
+            deck=ttsanr.load_octgn_deck(self.deckFile)
         else:
-            deck=ttanr.load_netrunnerdb_deck(deckID)
+            deck=ttsanr.load_netrunnerdb_deck(deckID)
 
         deck['back_filename']=self.backFile
 
         if self.useUrl.get():
-            ttanr.write_files(deck,self.urlEntry.get(),self.outputLocal.get(),self.outputDirEntry.get(),self.install.get())
+            ttsanr.write_files(deck,self.urlEntry.get(),self.outputLocal.get(),self.outputDirEntry.get(),self.install.get())
         else:
-            ttanr.write_files(deck,"null://",self.outputLocal.get(),self.outputDirEntry.get(),self.install.get())
+            ttsanr.write_files(deck,"null://",self.outputLocal.get(),self.outputDirEntry.get(),self.install.get())
 
-        tkMessageBox.showinfo("ttanr","Done")
+        tkMessageBox.showinfo("TTS ANR","Done")
 
 
 def main():
     root = Tk.Tk()
-    root.wm_title("TTANR")
-    ttanr=TTANR(root)
+    root.wm_title("TTS ANR")
+    ttsanr=TTSANR(root)
     root.mainloop()
 
 
