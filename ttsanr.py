@@ -42,19 +42,23 @@ def build_chest_file(deck,base_url):
 
 def get_runner_back():
     filename = os.path.join("cards","ANR","runner-back.png")
-    if os.path.isfile(filename):
-        return ttsutil.load_image_at_size(filename)
-    print "No image back found, generating one"
-    print "Create cards/ARN/runner-back.png to avoid this message."
-    return PIL.Image.new('RGBA',(ttsutil.imgW,ttsutil.imgH),(255,0,0,255))
+    if not os.path.isfile(filename):
+	print("No runner back found. Downloading")
+        data=urllib.urlopen("http://vignette1.wikia.nocookie.net/ancur/images/a/a0/Runner_back.png/revision/latest").read()
+        fh=open(filename,'wb')
+        fh.write(data)
+        fh.close()
+    return ttsutil.load_image_at_size(filename)
 
 def get_corp_back():
     filename = os.path.join("cards","ANR","corp-back.png")
-    if os.path.isfile(filename):
-        return ttsutil.load_image_at_size(filename)
-    print "No image back found, generating one"
-    print "Create cards/ANR/corp-back.png to avoid this message."
-    return PIL.Image.new('RGBA',(ttsutil.imgW,ttsutil.imgH),(0,0,255,255))
+    if not os.path.isfile(filename):
+	print("No corp back found. Downloading")
+        data=urllib.urlopen("http://vignette3.wikia.nocookie.net/ancur/images/c/c3/Corp_back.png/revision/latest").read()
+        fh=open(filename,'wb')
+        fh.write(data)
+        fh.close()
+    return ttsutil.load_image_at_size(filename)
 
 def get_card(id):
     if not cards.has_key(id):

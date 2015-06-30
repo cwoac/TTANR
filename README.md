@@ -6,8 +6,7 @@ ANR deck image creator, working from either octgn format files (`.o8n`) or netru
 
 ### Quickstart
 
-download `ttanr_gui.exe` from the [releases](https://github.com/cwoac/TTANR/releases/latest). Run it, enter a [netrunnerdb](http://netrunnerdb.com/) deck id, click go. Run Tabletop Simulator and look in the chest for the deck. Optionally, create `cards/ANR/corp-back.png` and `cards/ANR/runner-back.png` (ideally at 300x419) *before* importing your deck to get fancy card backs.
-
+download `ttanr_gui.exe` from the [releases](https://github.com/cwoac/TTANR/releases/latest). Run it, enter a [netrunnerdb](http://netrunnerdb.com/) deck id, click go. Run Tabletop Simulator and look in the chest for the deck.
 ### Usage
 
 For the cli, use either `ttanr.exe` or `python ttanr.py`; for the gui, `ttanr_gui.exe` or `python ttanr_gui.py`
@@ -48,7 +47,7 @@ This code is to be considered alpha - there is is little/no error handling at th
 
 It will create a .json file for Tabletop Simulator. If not installing locally then you need to provide an url for where the images will be stored. This *can* be a local path (e.g. `file:///c:/mydecks/`), but in that case you need to get the file to the other players and they must put it in the same location.
 
-Unless you override the card backs, it will use a fixed block of green for WHI or red or blue for ANR. For ANR, if you create `cards/ANR/corp-back.png` and `cards/ANR/runner-back.png` they will be used instead. These *should* be 300x419 in size.
+Unless you override the card backs, it will use a fixed block of green for WHI.
 
 It will only use the original card art - if you want to use alt art, figure out either the netrunnerdb card id for the card or WHI card name and replace cards/ANR/id.png or cards/WHI/name.jpg with your file (again, *should* be 300x419 to maximise quality).
 
