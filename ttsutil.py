@@ -10,7 +10,37 @@ import json
 imgW=300
 imgH=419
 
-def make_filename(image_name,game=None):
+def get_tts_dir():
+  #TODO handle non-user save option
+  return os.path.join(os.path.expanduser("~"),"Documents","My Games","Tabletop Simulator")
+
+def get_tts_chest_dir():
+  return os.path.join(get_tts_dir(),"Saves","Chest")
+
+def get_tts_image_dir():
+  return os.path.join(get_tts_dir(),"Mods","Images")
+
+def make_tts_game_dir(game):
+  if not game:
+    return
+  target=os.path.join(get_tts_chest_dir(),game)
+  if not os.path.isdir(target):
+    os.mkdir(target)
+
+def make_tts_chest_filename(filename,game=None):
+  if game:
+    return os.path.join(get_tts_chest_dir(),game,filename)
+  return os.path.join(get_tts_chest_dir(),filename)
+
+def make_tts_image_filename(filename):
+  # TTS stores images by renaming them to have a stripped version of the full
+  # url location of the file.
+  extension=os.path.splitext(filename)[1]
+  return os.path.join(get_tts_image_dir(),tts_strip_filename(filename)+extension)
+
+
+def make_cache_filename(image_name,game=None):
+  # figure out where we shall cache the file.
   if game:
     return os.path.join("cards",game,image_name)
   return os.path.join("cards",image_name)
@@ -28,7 +58,7 @@ def sanitise_filename(filename):
   valid_chars = "-_.()%s%s" % (string.ascii_letters, string.digits)
   return ''.join(c for c in filename if c in valid_chars)
 
-def tts_filename(filename):
+def tts_strip_filename(filename):
   # Convert a filename to TTS format.
   valid_chars = "%s%s" % (string.ascii_letters, string.digits)
   return ''.join(c for c in filename if c in valid_chars)
@@ -40,14 +70,13 @@ def gen_guid():
 def count_deck(deck):
   return sum([qty for _,qty in deck['cards']])
 
-def get_image(card_name,game=None):
+def get_cache_image(card_name,game=None):
   for image_format in ['.png','.jpg','.bmp']:
-    card_filename=make_filename(card_name+image_format,game)
+    card_filename=make_cache_filename(card_name+image_format,game)
     if os.path.isfile(card_filename):
       return load_image_at_size(card_filename)
   print("Unable to find image for %s (in %s)" % (card_name,game))
   return None
-
 
 def load_image_at_size(filename):
     # load an image, forcing the colourspace and resizing if required.
@@ -122,7 +151,7 @@ def build_deck_image(deck,back_image,game=None):
 
     curImg = 0
     for card,qty in deck['cards']:
-        image = get_image(card,game)
+        image = get_cache_image(card,game)
         for _ in range(qty):
             offX = (curImg%10)*imgW
             offY = (curImg/10)*imgH
@@ -152,17 +181,14 @@ def write_files(deck,chest,base_url,write_local,local_target,install,back_image,
     back_image.save(back_filename,'JPEG')
 
   if install:
-    tts_dir=os.path.join(os.path.expanduser("~"),"Documents","My Games","Tabletop Simulator")
-    tts_chest_dir=os.path.join(tts_dir,"Saves","Chest")
-    tts_image_dir=os.path.join(tts_dir,"Mods","Images")
-
-    tts_chest_name=os.path.join(tts_chest_dir,base_filename+'.json')
-    print("Writing %s" % tts_chest_name)
-    with open(tts_chest_name,'w') as chest_file:
+    tts_chest_filename=make_tts_chest_filename(base_filename+'.json',game)
+    make_tts_game_dir(game)
+    print("Writing %s" % tts_chest_filename)
+    with open(tts_chest_filename,'w') as chest_file:
       json.dump(chest,chest_file)
 
-    tts_deck_filename=os.path.join(tts_image_dir,tts_filename(base_url+base_filename+'.jpg')+'.jpg')
-    tts_back_filename=os.path.join(tts_image_dir,tts_filename(base_url+base_filename+'-back.jpg')+'.jpg')
+    tts_deck_filename=make_tts_image_filename(base_url+base_filename+'.jpg')
+    tts_back_filename=make_tts_image_filename(base_url+base_filename+'-back.jpg')
     print("Writing %s" % tts_deck_filename)
     deck_image.save(tts_deck_filename,'JPEG')
     print("Writing %s" % tts_back_filename)

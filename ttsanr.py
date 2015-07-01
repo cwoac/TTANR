@@ -20,7 +20,7 @@ debug=True
 
 # TTS util overrides
 def make_filename(image):
-  return ttsutil.make_filename(image,"ANR")
+  return ttsutil.make_cache_filename(image,"ANR")
 
 def make_cache_dir():
   ttsutil.make_cache_dir("ANR")
@@ -76,7 +76,7 @@ def get_card(id):
         image_filename = make_filename(id+".png")
         if not os.path.isfile(image_filename):
           make_cache_dir()
-          print "Downloading card image: %s" % image_filename
+          print "Downloading card image to: %s" % image_filename
           data=urllib.urlopen("http://netrunnerdb.com/%s" % j_data[0]['imagesrc']).read()
           fh=open(image_filename,'wb')
           fh.write(data)
@@ -93,7 +93,7 @@ def get_flip_image(id,idx):
     filename = make_filename(id+idx+".png")
     if not os.path.isfile(filename):
         make_cache_dir()
-        print "Downloading card image: %s" % filename
+        print "Downloading card image to: %s" % filename
         # TODO: figure out a better way of doing this.
         data=None
         if idx=='A':
@@ -180,7 +180,7 @@ def build_08012_image():
     offX+=ttsutil.imgW
     image=get_flip_image('08012','C')
     im.paste(image,(offX,0))
-    back=ttsutil.get_image('08012','ANR')
+    back=ttsutil.get_cache_image('08012','ANR')
     im.paste(back,(2700,2514))
     return im
 
@@ -206,7 +206,7 @@ def write_files(deck,base_url,write_local,local_target,install):
     return
 
   jbDeckImage=build_08012_image()
-  jbBackImage=ttsutil.get_image('08012','ANR')
+  jbBackImage=ttsutil.get_cache_image('08012','ANR')
 
   basefilename=deck['filename']
   jbDeckFilename=os.path.join(local_target,"08012-id.jpg")
@@ -219,11 +219,8 @@ def write_files(deck,base_url,write_local,local_target,install):
     jbBackImage.save(jbBackFilename,'JPEG')
 
   if install:
-    tts_dir=os.path.join(os.path.expanduser("~"),"Documents","My Games","Tabletop Simulator")
-    tts_image_dir=os.path.join(tts_dir,"Mods","Images")
-
-    ttsJbDeckFilename=os.path.join(tts_image_dir,ttsutil.tts_filename(base_url+jbDeckFilename)+'.jpg')
-    ttsJbBackFilename=os.path.join(tts_image_dir,ttsutil.tts_filename(base_url+jbBackFilename)+'.jpg')
+    ttsJbDeckFilename=ttsutil.make_tts_image_filename(base_url+jbDeckFilename)
+    ttsJbBackFilename=ttsutil.make_tts_image_filename(base_url+jbBackFilename)
     print("Writing %s" % ttsJbDeckFilename)
     jbDeckImage.save(ttsJbDeckFilename,'JPEG')
     print("Writing %s" % ttsJbBackFilename)

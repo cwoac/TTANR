@@ -7,11 +7,12 @@ ANR deck image creator, working from either octgn format files (`.o8n`) or netru
 ### Quickstart
 
 download `ttanr_gui.exe` from the [releases](https://github.com/cwoac/TTANR/releases/latest). Run it, enter a [netrunnerdb](http://netrunnerdb.com/) deck id, click go. Run Tabletop Simulator and look in the chest for the deck.
+
 ### Usage
 
 For the cli, use either `ttanr.exe` or `python ttanr.py`; for the gui, `ttanr_gui.exe` or `python ttanr_gui.py`
 
-The easiest way is via netrunnerdb. Both players create *public* decks then give the id to the other. Each then uses `-i` to automatically install the files into their TTS saved directory.
+The easiest way is via netrunnerdb. Both players create *public* decks then give the id to the other. Each then uses `-i` to automatically install the files into their TTS chest within an appropriate sub directory.
 Alternatively, don't use `-i` and put the created files up on a webserver using the `-w` and `-u` parameters
 Example:
 ````

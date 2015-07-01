@@ -14,7 +14,7 @@ game="WHI"
 # TTS util overrides
 
 def make_filename(image):
-  return ttsutil.make_filename(image,game)
+  return ttsutil.make_cache_filename(image,game)
 
 def make_cache_dir():
   ttsutil.make_cache_dir(game)
@@ -23,7 +23,7 @@ def get_card(id):
   filename=make_filename(id+".jpg")
   if not os.path.isfile(filename):
     make_cache_dir()
-    print("Downloading card: %s" % id)
+    print("Downloading card to: %s" % id)
     data=urllib.urlopen("https://deckbox.org/whi/%s" % id).read()
     soup=BeautifulSoup.BeautifulSoup(data)
     url="http://deckbox.org/%s" % soup.findAll('img',{'id':'card_image'})[0]['src']
@@ -60,7 +60,7 @@ def load_deckbox_deck(id):
   return deck
 
 def get_back():
-  image=ttsutil.get_image('whi-back',game) or PIL.Image.new('RGBA',(ttsutil.imgW,ttsutil.imgH),(0,255,0,255))
+  image=ttsutil.get_cache_image('whi-back',game) or PIL.Image.new('RGBA',(ttsutil.imgW,ttsutil.imgH),(0,255,0,255))
   return image
 
 def write_files(deck,base_url,write_local,local_target,install):
